@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador CNAE Avançado</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .search-section {
+      padding: 30px;
+      background: white;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 50px 15px 20px;
+      font-size: 16px;
+      border: 2px solid #e1e5e9;
+      border-radius: 25px;
+      outline: none;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .search-input:focus {
+      border-color: #4facfe;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      font-size: 18px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #e1e5e9;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .filter-btn:hover {
+      border-color: #4facfe;
+      background: #4facfe;
+      color: white;
+    }
+
+    .filter-btn.active {
+      background: #4facfe;
+      border-color: #4facfe;
+      color: white;
+    }
+
+    .results-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .results-count {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .clear-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .clear-btn:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 12px;
+      text-align: left;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e9ecef;
+      transition: background-color 0.2s ease;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .codigo-cell {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #4facfe;
+      white-space: nowrap;
+    }
+
+    .item-cell {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: #28a745;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+
+    .no-results-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .highlight {
+      background-color: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .filters {
+        justify-content: center;
+      }
+      
+      .results-info {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+      
+      table {
+        font-size: 14px;
+      }
+      
+      th, td {
+        padding: 8px 6px;
+      }
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4facfe;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Buscador CNAE</h1>
+      <p>Sistema avançado de consulta de códigos CNAE e serviços</p>
+    </div>
+
+    <div class="search-section">
+      <div class="search-container">
+        <input 
+          type="text" 
+          id="busca" 
+          class="search-input"
+          placeholder="Digite o código CNAE, descrição do serviço ou item..."
+          autocomplete="off"
+        >
+        <div class="search-icon">🔍</div>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="codigo">Por Código</button>
+        <button class="filter-btn" data-filter="descricao">Por Descrição</button>
+        <button class="filter-btn" data-filter="item">Por Item</button>
+      </div>
+
+      <div class="results-info">
+        <div class="results-count" id="contador">Exibindo todos os registros</div>
+        <button class="clear-btn" id="limpar" onclick="limparBusca()">Limpar</button>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Buscando...</div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Código CNAE</th>
+              <th>Descrição CNAE</th>
+              <th>Item</th>
+              <th>Descrição do Item</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela">
+            <!-- Os dados serão inseridos aqui -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="no-results" id="sem-resultados" style="display: none;">
+        <div class="no-results-icon">📭</div>
+        <h3>Nenhum resultado encontrado</h3>
+        <p>Tente ajustar os termos de busca ou filtros</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dados = [
+      { codigo: "6201-5/00", descricao: "Desenvolvimento de programas de computador sob encomenda", item: "01.01", itemDescricao: "Análise e desenvolvimento de sistemas." },
+      { codigo: "6201-5/00", descricao: "Desenvolvimento de programas de computador sob encomenda", item: "01.02", itemDescricao: "Programação." },
+      { codigo: "6190-6/01", descricao: "Provedores de acesso às redes de comunicações", item: "01.03", itemDescricao: "Processamento de dados e congêneres." },
+      { codigo: "1830-0/03", descricao: "Reprodução de software em qualquer suporte", item: "01.03", itemDescricao: "Processamento de dados e congêneres." },
+      { codigo: "6311-9/00", descricao: "Tratamento de dados, provedores de serviços de aplicação e serviços de hospedagem na internet", item: "01.03", itemDescricao: "Processamento de dados e congêneres." },
+      { codigo: "6202-3/00", descricao: "Desenvolvimento e licenciamento de programas de computador customizáveis", item: "01.04", itemDescricao: "Elaboração de programas de computadores." },
+      { codigo: "6203-1/00", descricao: "Desenvolvimento e licenciamento de programas de computador não-customizáveis", item: "01.04", itemDescricao: "Elaboração de programas de computadores." },
+      { codigo: "6204-0/00", descricao: "Consultoria em tecnologia da informação", item: "01.05", itemDescricao: "Consultoria em informática." },
+      { codigo: "6209-1/00", descricao: "Suporte técnico, manutenção e outros serviços em tecnologia da informação", item: "01.06", itemDescricao: "Suporte técnico em informática, inclusive instalação." },
+      { codigo: "7319-0/02", descricao: "Promoção de vendas", item: "01.07", itemDescricao: "Planejamento, confecção, manutenção e veiculação de páginas eletrônicas." }
+    ];
+
+    let filtroAtivo = 'all';
+    let dadosFiltrados = [...dados];
+
+    // Inicializar a tabela
+    document.addEventListener('DOMContentLoaded', function() {
+      exibirResultados(dados);
+      configurarEventListeners();
+    });
+
+    function configurarEventListeners() {
+      const inputBusca = document.getElementById('busca');
+      const filtros = document.querySelectorAll('.filter-btn');
+
+      // Busca em tempo real com debounce
+      let timeoutId;
+      inputBusca.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          buscar();
+        }, 300);
+      });
+
+      // Configurar filtros
+      filtros.forEach(btn => {
+        btn.addEventListener('click', function() {
+          filtros.forEach(f => f.classList.remove('active'));
+          this.classList.add('active');
+          filtroAtivo = this.getAttribute('data-filter');
+          buscar();
+        });
+      });
+    }
+
+    function buscar() {
+      const termo = document.getElementById('busca').value.toLowerCase().trim();
+      const loading = document.getElementById('loading');
+      
+      // Mostrar loading para buscas mais demoradas
+      if (termo.length > 2) {
+        loading.style.display = 'block';
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 200);
+      }
+
+      let resultados = dados;
+
+      // Aplicar filtro por tipo
+      if (filtroAtivo !== 'all' && termo) {
+        resultados = dados.filter(linha => {
+          switch(filtroAtivo) {
+            case 'codigo':
+              return linha.codigo.toLowerCase().includes(termo);
+            case 'descricao':
+              return linha.descricao.toLowerCase().includes(termo);
+            case 'item':
+              return linha.item.toLowerCase().includes(termo) || 
+                     linha.itemDescricao.toLowerCase().includes(termo);
+            default:
+              return true;
+          }
+        });
+      } else if (termo) {
+        // Busca geral
+        resultados = dados.filter(linha =>
+          linha.codigo.toLowerCase().includes(termo) ||
+          linha.descricao.toLowerCase().includes(termo) ||
+          linha.item.toLowerCase().includes(termo) ||
+          linha.itemDescricao.toLowerCase().includes(termo)
+        );
+      }
+
+      dadosFiltrados = resultados;
+      exibirResultados(resultados, termo);
+    }
+
+    function exibirResultados(resultados, termoBusca = '') {
+      const corpo = document.getElementById('corpo-tabela');
+      const contador = document.getElementById('contador');
+      const semResultados = document.getElementById('sem-resultados');
+      const tableContainer = document.querySelector('.table-container');
+
+      corpo.innerHTML = '';
+
+      if (resultados.length === 0) {
+        tableContainer.style.display = 'none';
+        semResultados.style.display = 'block';
+        contador.textContent = 'Nenhum resultado encontrado';
+        return;
+      }
+
+      tableContainer.style.display = 'block';
+      semResultados.style.display = 'none';
+
+      resultados.forEach((linha, index) => {
+        const tr = document.createElement('tr');
+        tr.style.animationDelay = `${index * 50}ms`;
+        
+        tr.innerHTML = `
+          <td class="codigo-cell">${destacarTexto(linha.codigo, termoBusca)}</td>
+          <td>${destacarTexto(linha.descricao, termoBusca)}</td>
+          <td class="item-cell">${destacarTexto(linha.item, termoBusca)}</td>
+          <td>${destacarTexto(linha.itemDescricao, termoBusca)}</td>
+        `;
+        corpo.appendChild(tr);
+      });
+
+      // Atualizar contador
+      if (termoBusca) {
+        contador.textContent = `${resultados.length} resultado${resultados.length !== 1 ? 's' : ''} encontrado${resultados.length !== 1 ? 's' : ''}`;
+      } else {
+        contador.textContent = `Exibindo ${resultados.length} registro${resultados.length !== 1 ? 's' : ''}`;
+      }
+    }
+
+    function destacarTexto(texto, termo) {
+      if (!termo) return texto;
+      
+      const regex = new RegExp(`(${termo})`, 'gi');
+      return texto.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function limparBusca() {
+      document.getElementById('busca').value = '';
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+      filtroAtivo = 'all';
+      exibirResultados(dados);
+    }
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('busca').focus();
+      }
+      if (e.key === 'Escape') {
+        limparBusca();
+      }
+    });
+  </script>
+</body>
+</html>
