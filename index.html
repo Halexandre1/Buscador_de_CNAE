@@ -1,89 +1,159 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador CNAE - Sistema Completo de Tributação</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = { darkMode: 'class' }
-  </script>
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador CNAE - Sistema Completo de Tributação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Estilo para destacar o texto da busca */
+        mark {
+            background-color: #fef08a; /* Amarelo-claro */
+            color: #713f12; /* Texto escuro para contraste */
+            padding: 2px 1px;
+            border-radius: 3px;
+        }
+        .dark mark {
+            background-color: #fde047;
+            color: #422006;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 dark:bg-gray-900 text-slate-800 dark:text-slate-200 h-screen overflow-hidden">
 
-  <div class="container max-w-7xl mx-auto p-4 h-full flex flex-col">
-    <header class="mb-6 flex items-center justify-between gap-4 flex-shrink-0">
-        <div class="flex items-center gap-4">
-            <img src="https://raw.githubusercontent.com/Halexandre1/PDF_PRO/main/HERBERT.jpg" alt="Logótipo" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-800">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800 dark:text-white text-left">Sistema CNAE Tributário</h1>
-                <p class="text-slate-500 dark:text-slate-400 text-sm text-left">Consulta completa de códigos CNAE</p>
+    <div class="container max-w-7xl mx-auto p-4 h-full flex flex-col">
+        <header class="mb-6 flex items-center justify-between gap-4 flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <img src="https://raw.githubusercontent.com/Halexandre1/PDF_PRO/main/HERBERT.jpg" alt="Logótipo" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-800">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white text-left">Sistema CNAE Tributário</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm text-left">Consulta completa de códigos CNAE</p>
+                </div>
+            </div>
+            <button id="themeToggle" class="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-transform hover:scale-110 shadow-md" aria-label="Alternar tema">🌙</button>
+        </header>
+
+        <div class="search-container relative mb-6 flex-shrink-0">
+            <input type="text" id="busca" class="w-full p-4 pl-12 pr-10 text-base bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow" placeholder="Busque por código CNAE, descrição, tributação ou observações..." autocomplete="off">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <i class="fas fa-search"></i>
+            </div>
+            <button id="clear-search" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 hidden">&times;</button>
+        </div>
+
+        <div class="disclaimer bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-800 dark:text-yellow-300 p-4 rounded-md mb-6 text-center text-sm flex-shrink-0">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <strong>Atenção:</strong> Ferramenta em desenvolvimento. Sempre valide as informações em fontes oficiais.
+        </div>
+
+        <div class="flex-grow overflow-auto">
+            <div class="stats grid grid-cols-2 gap-4 mb-6">
+                <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-lg shadow-md text-center">
+                    <div class="stat-number text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="total-registros">0</div>
+                    <div class="stat-label text-sm text-slate-500 dark:text-slate-400">Total de Registros</div>
+                </div>
+                <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-lg shadow-md text-center">
+                    <div class="stat-number text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="resultados-encontrados">0</div>
+                    <div class="stat-label text-sm text-slate-500 dark:text-slate-400">Resultados Encontrados</div>
+                </div>
+            </div>
+
+            <div class="table-container bg-white dark:bg-slate-800 rounded-lg shadow-md">
+                <table class="table w-full text-sm text-left text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-700 sticky top-0">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 min-w-[120px]">Código CNAE</th>
+                            <th scope="col" class="px-6 py-3 min-w-[250px]">Descrição CNAE</th>
+                            <th scope="col" class="px-6 py-3 min-w-[80px]">Item</th>
+                            <th scope="col" class="px-6 py-3 min-w-[200px]">Descrição do Serviço</th>
+                            <th scope="col" class="px-6 py-3 min-w-[100px]">ISS</th>
+                            <th scope="col" class="px-6 py-3 min-w-[100px]">IRRF</th>
+                            <th scope="col" class="px-6 py-3 min-w-[100px]">CSRF</th>
+                            <th scope="col" class="px-6 py-3 min-w-[100px]">INSS</th>
+                            <th scope="col" class="px-6 py-3 min-w-[200px]">Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela">
+                    </tbody>
+                </table>
             </div>
         </div>
-        <button id="themeToggle" class="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-transform hover:scale-110 shadow-md" aria-label="Alternar tema">🌙</button>
-    </header>
-
-    <div class="search-container relative mb-6 flex-shrink-0">
-      <input type="text" id="busca" class="w-full p-4 pl-12 pr-10 text-base bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow" placeholder="Busque por código CNAE, descrição, tributação ou observações..." autocomplete="off">
-      <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-        <i class="fas fa-search"></i>
-      </div>
-      <button id="clear-search" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 hidden">&times;</button>
+        
+        <footer id="signature" class="text-center mt-6 text-sm text-slate-500 dark:text-slate-400 flex-shrink-0"></footer>
     </div>
 
-    <div class="disclaimer bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-800 dark:text-yellow-300 p-4 rounded-md mb-6 text-center text-sm flex-shrink-0">
-      <i class="fas fa-exclamation-triangle mr-2"></i>
-      <strong>Atenção:</strong> Ferramenta em desenvolvimento. Sempre valide as informações em fontes oficiais.
-    </div>
+    <script id="searchWorker" type="javascript/worker">
+        let allData = [];
+        let totalRegistros = 0;
 
-    <!-- Conteúdo que rola -->
-    <div class="flex-grow overflow-auto">
-        <div class="stats grid grid-cols-2 gap-4 mb-6">
-          <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-lg shadow-md text-center">
-            <div class="stat-number text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="total-registros">0</div>
-            <div class="stat-label text-sm text-slate-500 dark:text-slate-400">Total de Registros</div>
-          </div>
-          <div class="stat-card bg-white dark:bg-slate-800 p-4 rounded-lg shadow-md text-center">
-            <div class="stat-number text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="resultados-encontrados">0</div>
-            <div class="stat-label text-sm text-slate-500 dark:text-slate-400">Resultados Encontrados</div>
-          </div>
-        </div>
+        const normalizeText = (str) => str.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const normalizeCode = (code) => code.toString().replace(/[^0-9]/g, '');
 
-        <div class="table-container bg-white dark:bg-slate-800 rounded-lg shadow-md">
-          <table class="table w-full text-sm text-left text-slate-500 dark:text-slate-400">
-            <thead class="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-50 dark:bg-slate-700 sticky top-0">
-              <tr>
-                <th scope="col" class="px-6 py-3 min-w-[120px]">Código CNAE</th>
-                <th scope="col" class="px-6 py-3 min-w-[250px]">Descrição CNAE</th>
-                <th scope="col" class="px-6 py-3 min-w-[80px]">Item</th>
-                <th scope="col" class="px-6 py-3 min-w-[200px]">Descrição do Serviço</th>
-                <th scope="col" class="px-6 py-3 min-w-[100px]">ISS</th>
-                <th scope="col" class="px-6 py-3 min-w-[100px]">IRRF</th>
-                <th scope="col" class="px-6 py-3 min-w-[100px]">CSRF</th>
-                <th scope="col" class="px-6 py-3 min-w-[100px]">INSS</th>
-                <th scope="col" class="px-6 py-3 min-w-[200px]">Observações</th>
-              </tr>
-            </thead>
-            <tbody id="corpo-tabela">
-            </tbody>
-          </table>
-        </div>
-    </div>
-    
-    <footer id="signature" class="text-center mt-6 text-sm text-slate-500 dark:text-slate-400 flex-shrink-0"></footer>
-  </div>
+        const buildSearchIndex = (data) => {
+            allData = data.map(item => ({
+                ...item,
+                searchText: normalizeText(Object.values(item).join(' ')),
+                searchCode: normalizeCode(item.codigo),
+                // MELHORIA: Campo específico para buscar o item de forma flexível
+                searchItem: normalizeCode(item.item) 
+            }));
+            totalRegistros = data.length;
+        };
 
-  <script id="searchWorker" type="javascript/worker">
-    // --- DADOS CNAE ---
-    const dados = [
-        { codigo: "0119-9/99", descricao: "Cultivo de outras plantas de lavoura temporária não especificadas anteriormente", item: "07.16", itemDescricao: "7.16 - Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.", iss: "0,03", irrf: "-", csrf: "-",inss: "-", observacoes: "ANEXO - " },
+        self.onmessage = function(e) {
+            const { type, payload } = e.data;
+
+            if (type === 'INIT') {
+                buildSearchIndex(payload.data);
+                postMessage({ type: 'READY', totalRegistros });
+                return;
+            }
+
+            if (type === 'SEARCH') {
+                const termo = payload.termo.trim();
+                if (termo === '') {
+                    postMessage({ type: 'RESULTS', resultados: allData.map(({searchText, searchCode, searchItem, ...rest}) => rest), totalRegistros });
+                    return;
+                }
+                
+                const termoNormalizado = normalizeText(termo);
+                const searchTokens = termoNormalizado.split(' ').filter(Boolean);
+                const codigoBusca = normalizeCode(termo);
+
+                const resultados = allData.filter(linha => {
+                    const codigoMatch = codigoBusca.length > 0 && linha.searchCode.includes(codigoBusca);
+                    // MELHORIA: Adiciona a busca pelo item normalizado
+                    const itemMatch = codigoBusca.length > 0 && linha.searchItem.includes(codigoBusca);
+                    const textMatch = searchTokens.every(token => linha.searchText.includes(token));
+                    // A linha é incluída se corresponder a QUALQUER uma das condições
+                    return codigoMatch || itemMatch || textMatch;
+                }).map(({searchText, searchCode, searchItem, ...rest}) => rest);
+
+                postMessage({ type: 'RESULTS', resultados, totalRegistros });
+            }
+        };
+    </script>
+
+    <script>
+        /**
+         * @file Buscador CNAE - Versão Final Refatorada
+         * @author HAlexandre
+         * @version 3.1.0
+         */
+
+        const AppState = {
+            searchWorker: null,
+            debounceTimer: null,
+            cnaeData: [
+                 { codigo: "0119-9/99", descricao: "Cultivo de outras plantas de lavoura temporária não especificadas anteriormente", item: "07.16", itemDescricao: "7.16 - Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.", iss: "0,03", irrf: "-", csrf: "-",inss: "-", observacoes: "ANEXO - " },
 { codigo: "0161-0/01", descricao: "Serviço de pulverização e controle de pragas agrícolas", item: "07.13", itemDescricao: "7.13 - Dedetização, desinfecção, desinsetização, imunização, higienização, desratização, pulverização e congêneres.", iss: "0,03", irrf: "-", csrf: "-",inss: "-", observacoes: "ANEXO - " },
 { codigo: "0161-0/02", descricao: "Serviço de poda de árvores para lavouras", item: "07.11", itemDescricao: "7.11 - Decoração e jardinagem, inclusive corte e poda de árvores.", iss: "0,03", irrf: "-", csrf: "-",inss: "-", observacoes: "ANEXO - " },
 { codigo: "0161-0/02", descricao: "Serviço de poda de árvores para lavouras", item: "07.16", itemDescricao: "7.16 - Florestamento, reflorestamento, semeadura, adubação, reparação de solo, plantio, silagem, colheita, corte e descascamento de árvores, silvicultura, exploração florestal e dos serviços congêneres indissociáveis da formação, manutenção e colheita de florestas, para quaisquer fins e por quaisquer meios.", iss: "0,03", irrf: "-", csrf: "-",inss: "-", observacoes: "ANEXO - " },
@@ -2161,229 +2231,215 @@
 { codigo: "8412-4/00", descricao: "Regulação das atividades de saúde, educação, serviços culturais e outros serviços sociais", item: "27.01", itemDescricao: "27.01 - Serviços de assistência social.", iss: "0,03", irrf: "1,5%", csrf: "4,65%",inss: "-", observacoes: "ANEXO - " },
 { codigo: "8532-5/00", descricao: "Educação superior - graduação e pós-graduação", item: "08.02", itemDescricao: "08.02 - Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.", iss: "0,03", irrf: "1,5%", csrf: "4,65%",inss: "-", observacoes: "ANEXO - III" },
 
-    ];
-
-    const normalizeText = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-    const allData = dados.map(item => ({
-        ...item,
-        searchText: normalizeText(Object.values(item).join(' '))
-    }));
-    const totalRegistros = dados.length;
-
-    function normalizarCodigo(codigo) {
-        return codigo.replace(/[^0-9]/g, '');
-    }
-
-    self.onmessage = function(e) {
-        const termo = e.data.termo.trim();
-
-        if (termo === '') {
-            postMessage({ tipo: 'resultados', resultados: dados, totalRegistros });
-            return;
-        }
+            ]
+        };
         
-        const termoNormalizado = normalizeText(termo);
-        const searchTokens = termoNormalizado.split(' ').filter(Boolean);
-        const codigoBusca = normalizarCodigo(termo);
+        const UI = {
+            dom: {
+                busca: document.getElementById('busca'),
+                corpoTabela: document.getElementById('corpo-tabela'),
+                clearButton: document.getElementById('clear-search'),
+                totalRegistros: document.getElementById('total-registros'),
+                resultadosEncontrados: document.getElementById('resultados-encontrados'),
+                themeToggle: document.getElementById('themeToggle'),
+                signature: document.getElementById('signature'),
+            },
 
-        const resultados = allData.filter(linha => {
-            const codigoMatch = codigoBusca.length > 0 && normalizarCodigo(linha.codigo).includes(codigoBusca);
-            const textMatch = searchTokens.every(token => linha.searchText.includes(token));
-            return codigoMatch || textMatch;
-        });
-
-        postMessage({ tipo: 'resultados', resultados, totalRegistros });
-    };
-  </script>
-
-  <script>
-    /**
-     * @file Buscador CNAE - Versão com Web Worker e Busca Inteligente
-     * @author HAlexandre
-     * @version 2.6.1
-     */
-
-    // --- Módulo de UI ---
-    const UI = {
-        dom: {
-            busca: document.getElementById('busca'),
-            corpoTabela: document.getElementById('corpo-tabela'),
-            clearButton: document.getElementById('clear-search'),
-            totalRegistros: document.getElementById('total-registros'),
-            resultadosEncontrados: document.getElementById('resultados-encontrados'),
-            themeToggle: document.getElementById('themeToggle'),
-            signature: document.getElementById('signature'),
-        },
-
-        renderizarTabela(resultados) {
-            this.dom.corpoTabela.innerHTML = '';
-            if (resultados.length === 0) {
-                this.dom.corpoTabela.innerHTML = `<tr><td colspan="9" class="text-center p-16 text-slate-500"><i class="fas fa-search text-4xl mb-4 block"></i>Nenhum resultado encontrado.</td></tr>`;
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            resultados.forEach(linha => {
-                const tr = document.createElement('tr');
-                tr.className = "bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600";
+            renderizarTabela(resultados, termoBusca) {
+                this.dom.corpoTabela.innerHTML = '';
+                if (resultados.length === 0) {
+                    this.dom.corpoTabela.innerHTML = `<tr><td colspan="9" class="text-center p-16 text-slate-500"><i class="fas fa-search text-4xl mb-4 block"></i>Nenhum resultado encontrado.</td></tr>`;
+                    return;
+                }
                 
-                const createTag = (text, type) => {
-                    if (!text) text = '-';
-                    const styles = {
-                        iss: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-                        federal: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-                        inss: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-                        isento: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+                const highlight = (text, termo) => {
+                    if (!termo || !text) return text;
+                    // Escapa caracteres especiais do termo para usar na RegExp
+                    const escapedTermo = termo.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const regex = new RegExp(`(${escapedTermo})`, 'gi');
+                    return text.toString().replace(regex, `<mark>$1</mark>`);
+                };
+
+                const fragment = document.createDocumentFragment();
+                resultados.forEach(linha => {
+                    const tr = document.createElement('tr');
+                    tr.className = "bg-white dark:bg-slate-800 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600";
+                    
+                    const createTag = (text, type) => {
+                        if (!text || text.trim() === '-') return '<span class="text-slate-400">-</span>';
+                        const styles = {
+                            iss: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+                            federal: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+                            inss: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+                            isento: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+                        };
+                        const lowerText = text.toLowerCase();
+                        const isento = lowerText.includes('isento') || lowerText.includes('incluso');
+                        return `<span class="px-2 py-1 text-xs font-medium rounded-full ${isento ? styles.isento : styles[type]}">${highlight(text, termoBusca)}</span>`;
                     };
-                    const isento = text.toLowerCase().includes('isento') || text.toLowerCase().includes('incluso');
-                    return `<span class="px-2 py-1 text-xs font-medium rounded-full ${isento ? styles.isento : styles[type]}">${text}</span>`;
-                };
 
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                        <div class="flex items-center gap-2">
-                            <span class="px-3 py-1 bg-indigo-600 text-white rounded-full text-xs">${linha.codigo}</span>
-                            <button class="copy-btn p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-indigo-500" data-copy="${linha.codigo}" title="Copiar Código">
-                                <i class="far fa-copy"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4">${linha.descricao}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-2">
-                            <span class="font-semibold">${linha.item}</span>
-                            <button class="copy-btn p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-indigo-500" data-copy="${linha.item}" title="Copiar Item">
-                                <i class="far fa-copy"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 max-w-xs whitespace-normal">${linha.itemDescricao}</td>
-                    <td class="px-6 py-4">${createTag(linha.iss, 'iss')}</td>
-                    <td class="px-6 py-4">${createTag(linha.irrf, 'federal')}</td>
-                    <td class="px-6 py-4">${createTag(linha.csrf, 'federal')}</td>
-                    <td class="px-6 py-4">${createTag(linha.inss, 'inss')}</td>
-                    <td class="px-6 py-4 text-xs italic">${linha.observacoes}</td>
-                `;
-                fragment.appendChild(tr);
-            });
-            this.dom.corpoTabela.appendChild(fragment);
-        },
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 bg-indigo-600 text-white rounded-full text-xs">${highlight(linha.codigo, termoBusca)}</span>
+                                <button class="copy-btn p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-indigo-500" data-copy="${linha.codigo}" title="Copiar Código"><i class="far fa-copy"></i></button>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">${highlight(linha.descricao, termoBusca)}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold">${highlight(linha.item, termoBusca)}</span>
+                                <button class="copy-btn p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-indigo-500" data-copy="${linha.item}" title="Copiar Item"><i class="far fa-copy"></i></button>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 max-w-xs whitespace-normal">${highlight(linha.itemDescricao, termoBusca)}</td>
+                        <td class="px-6 py-4">${createTag(linha.iss, 'iss')}</td>
+                        <td class="px-6 py-4">${createTag(linha.irrf, 'federal')}</td>
+                        <td class="px-6 py-4">${createTag(linha.csrf, 'federal')}</td>
+                        <td class="px-6 py-4">${createTag(linha.inss, 'inss')}</td>
+                        <td class="px-6 py-4 text-xs italic">${highlight(linha.observacoes, termoBusca)}</td>
+                    `;
+                    fragment.appendChild(tr);
+                });
+                this.dom.corpoTabela.appendChild(fragment);
+            },
 
-        atualizarEstatisticas(resultados, totalRegistros) {
-            this.dom.totalRegistros.textContent = totalRegistros;
-            this.dom.resultadosEncontrados.textContent = resultados.length;
-        },
+            atualizarEstatisticas(resultados, totalRegistros) {
+                this.dom.totalRegistros.textContent = totalRegistros;
+                this.dom.resultadosEncontrados.textContent = resultados.length;
+            },
 
-        toggleClearButton(visible) {
-            this.dom.clearButton.classList.toggle('hidden', !visible);
-        },
+            toggleClearButton(visible) {
+                this.dom.clearButton.classList.toggle('hidden', !visible);
+            },
 
-        mostrarLoading() {
-            this.dom.corpoTabela.innerHTML = `<tr><td colspan="9" class="text-center p-16"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto"></div><p class="mt-4">Buscando...</p></td></tr>`;
-        },
+            mostrarLoading() {
+                this.dom.corpoTabela.innerHTML = `<tr><td colspan="9" class="text-center p-16"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto"></div><p class="mt-4">Buscando...</p></td></tr>`;
+            },
 
-        loadTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                this.dom.themeToggle.textContent = '☀️';
-            } else {
-                this.dom.themeToggle.textContent = '🌙';
+            loadTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                    this.dom.themeToggle.textContent = '☀️';
+                } else {
+                    this.dom.themeToggle.textContent = '🌙';
+                }
+            },
+
+            setSignature() {
+                this.dom.signature.innerHTML = `<p>Feito por HAlexandre © ${new Date().getFullYear()}</p>`;
             }
-        },
+        };
 
-        setSignature() {
-            this.dom.signature.innerHTML = `<p>Feito por HAlexandre © ${new Date().getFullYear()}</p>`;
-        }
-    };
-
-    // --- Módulo Principal da Aplicação ---
-    const App = {
-        searchWorker: null,
-        debounceTimer: null,
-
-        init() {
-            this.setupWorker();
-            this.setupEventListeners();
-            UI.loadTheme();
-            UI.setSignature();
-        },
-
-        setupWorker() {
-            try {
-                const workerBlob = new Blob([document.getElementById('searchWorker').textContent], { type: 'application/javascript' });
-                this.searchWorker = new Worker(URL.createObjectURL(workerBlob));
-                this.searchWorker.onmessage = (e) => {
-                    const { tipo, resultados, totalRegistros } = e.data;
-                    if (tipo === 'resultados') {
-                        UI.renderizarTabela(resultados);
-                        UI.atualizarEstatisticas(resultados, totalRegistros);
-                    }
-                };
-                this.searchWorker.postMessage({ termo: '' });
-            } catch (e) {
-                console.error("Erro ao iniciar o Web Worker:", e);
-                UI.dom.corpoTabela.innerHTML = `<tr><td colspan="9" class="text-center p-16 text-red-500">Ocorreu um erro ao carregar a aplicação.</td></tr>`;
-            }
-        },
-
-        setupEventListeners() {
-            UI.dom.busca.addEventListener('input', () => {
-                clearTimeout(this.debounceTimer);
-                UI.toggleClearButton(UI.dom.busca.value.length > 0);
-                UI.mostrarLoading();
-                this.debounceTimer = setTimeout(() => {
-                    this.searchWorker.postMessage({ termo: UI.dom.busca.value });
-                }, 300);
-            });
-
-            UI.dom.clearButton.addEventListener('click', () => {
-                UI.dom.busca.value = '';
-                UI.toggleClearButton(false);
-                this.searchWorker.postMessage({ termo: '' });
-                UI.dom.busca.focus();
-            });
-
-            UI.dom.themeToggle.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-                const isDark = document.documentElement.classList.contains('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                UI.dom.themeToggle.textContent = isDark ? '☀️' : '🌙';
-            });
-            
-            UI.dom.corpoTabela.addEventListener('click', async (e) => {
-                const copyButton = e.target.closest('.copy-btn');
-                if (copyButton) {
-                    const textToCopy = copyButton.dataset.copy;
+        const Logic = {
+            async copyToClipboard(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    console.warn('Modern copy failed, trying fallback.', err);
                     try {
                         const tempTextarea = document.createElement('textarea');
-                        tempTextarea.value = textToCopy;
+                        tempTextarea.value = text;
                         document.body.appendChild(tempTextarea);
                         tempTextarea.select();
                         document.execCommand('copy');
                         document.body.removeChild(tempTextarea);
+                        return true;
+                    } catch (fallbackErr) {
+                        console.error('Fallback copy failed: ', fallbackErr);
+                        return false;
+                    }
+                }
+            }
+        };
+        
+        const Events = {
+            setup() {
+                UI.dom.busca.addEventListener('input', () => {
+                    clearTimeout(AppState.debounceTimer);
+                    const termo = UI.dom.busca.value;
+                    UI.toggleClearButton(termo.length > 0);
+                    UI.mostrarLoading();
+                    AppState.debounceTimer = setTimeout(() => {
+                        AppState.searchWorker.postMessage({ type: 'SEARCH', payload: { termo } });
+                    }, 300);
+                });
 
+                UI.dom.clearButton.addEventListener('click', () => {
+                    UI.dom.busca.value = '';
+                    UI.toggleClearButton(false);
+                    UI.mostrarLoading();
+                    AppState.searchWorker.postMessage({ type: 'SEARCH', payload: { termo: '' } });
+                    UI.dom.busca.focus();
+                });
+
+                UI.dom.themeToggle.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                    const isDark = document.documentElement.classList.contains('dark');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    UI.dom.themeToggle.textContent = isDark ? '☀️' : '🌙';
+                });
+                
+                UI.dom.corpoTabela.addEventListener('click', async (e) => {
+                    const copyButton = e.target.closest('.copy-btn');
+                    if (copyButton) {
+                        const textToCopy = copyButton.dataset.copy;
                         const originalIcon = copyButton.innerHTML;
-                        copyButton.innerHTML = '<i class="fas fa-check text-green-500"></i>';
-                        setTimeout(() => {
-                            copyButton.innerHTML = originalIcon;
-                        }, 1500);
-                    } catch (err) {
-                        console.error('Failed to copy: ', err);
-                        const originalIcon = copyButton.innerHTML;
-                        copyButton.innerHTML = '<i class="fas fa-times text-red-500"></i>';
+                        const success = await Logic.copyToClipboard(textToCopy);
+                        
+                        if (success) {
+                            copyButton.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                        } else {
+                            copyButton.innerHTML = '<i class="fas fa-times text-red-500"></i>';
+                        }
+                        
                         setTimeout(() => {
                             copyButton.innerHTML = originalIcon;
                         }, 1500);
                     }
-                }
-            });
-        }
-    };
+                });
+            }
+        };
 
-    // --- Ponto de Entrada ---
-    document.addEventListener('DOMContentLoaded', () => App.init());
-  </script>
+        const App = {
+            init() {
+                this.setupWorker();
+                Events.setup();
+                UI.loadTheme();
+                UI.setSignature();
+                UI.mostrarLoading(); 
+            },
+
+            setupWorker() {
+                try {
+                    const workerBlob = new Blob([document.getElementById('searchWorker').textContent], { type: 'application/javascript' });
+                    AppState.searchWorker = new Worker(URL.createObjectURL(workerBlob));
+                    
+                    AppState.searchWorker.onmessage = (e) => {
+                        const { type, resultados, totalRegistros } = e.data;
+                        if (type === 'READY') {
+                            AppState.searchWorker.postMessage({ type: 'SEARCH', payload: { termo: '' } });
+                        }
+                        if (type === 'RESULTS') {
+                            const termoBusca = UI.dom.busca.value;
+                            UI.renderizarTabela(resultados, termoBusca);
+                            UI.atualizarEstatisticas(resultados, totalRegistros);
+                        }
+                    };
+                    
+                    AppState.searchWorker.postMessage({ type: 'INIT', payload: { data: AppState.cnaeData } });
+
+                } catch (e) {
+                    console.error("Erro ao iniciar o Web Worker:", e);
+                    UI.dom.corpoTabela.innerHTML = `<tr><td colspan="9" class="text-center p-16 text-red-500">Ocorreu um erro ao carregar a aplicação.</td></tr>`;
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
 </body>
 </html>
+
